@@ -325,23 +325,28 @@ Please select your bookkeeping software.
         fetch("https://formspree.io/f/mldeklbe", {
           method: "POST",
           headers: {
-            "Content-Type": "application/x-www-form-urlencoded",
+            "Content-Type": "application/json",
+            "Accept": "application/json"
           },
-          body: new URLSearchParams(object),
+          body: JSON.stringify(object),
         })
           .then(async (response) => {
-            if (response.status == 200 || response.ok) {
+            const data = await response.json().catch(() => ({}));
+
+            // Formspree returns ok: true in the response body on success
+            if (response.ok || data.ok) {
               result.classList.add("text-green-500");
               result.innerHTML = "Submission successful! We'll get back to you soon.";
               form.reset();
               form.classList.remove("was-validated");
             } else {
+              console.error("Submission error:", data);
               result.classList.add("text-red-500");
               result.innerHTML = "Submission failed. Please try again.";
             }
           })
           .catch((error) => {
-            console.log(error);
+            console.error("Network error:", error);
             result.classList.add("text-red-500");
             result.innerHTML = "Submission failed. Please try again.";
           })
